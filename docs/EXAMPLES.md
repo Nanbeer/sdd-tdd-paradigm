@@ -223,7 +223,7 @@ Spec-02: 配置文件不存在时使用默认值
   test result: ok. 5 passed; 0 failed
 
 覆盖率检查：
-  spec-tracker.sh check
+  python scripts/spec-tracker.py check .sdd-tdd/proposal.md tests
   - Spec-01: ✓ test_load_from_file
   - Spec-02: ✓ test_default_config
   - Spec-03: ✓ test_env_override
@@ -531,7 +531,7 @@ git commit -m "fix: address review findings"
 
 # 任何人
 # Phase 5
-git add TASK_ARCHIVE.md
+git add archive/2026-06-17_config-manager.md
 git commit -m "archive: config manager task"
 git checkout main
 git merge feature/config-manager

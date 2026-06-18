@@ -62,7 +62,7 @@ install_to_user() {
 
     mkdir -p "$USER_SKILL_DIR"
     cp -r "$SCRIPT_DIR/skills/$SKILL_NAME" "$target_dir"
-    chmod +x "$target_dir/scripts/"*.sh 2>/dev/null || true
+    # Python 脚本无需执行权限，用 `python scripts/xxx.py` 调用
 
     log_success "已安装到用户目录：$target_dir"
     log_info "该技能将在所有项目中可用"
@@ -90,7 +90,7 @@ install_to_project() {
 
     mkdir -p "$project_dir/.claude/skills"
     cp -r "$SCRIPT_DIR/skills/$SKILL_NAME" "$target_dir"
-    chmod +x "$target_dir/scripts/"*.sh 2>/dev/null || true
+    # Python 脚本无需执行权限，用 `python scripts/xxx.py` 调用
 
     log_success "已安装到项目目录：$target_dir"
     log_info "该技能仅在该项目中可用"

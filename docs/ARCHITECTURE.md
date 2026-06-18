@@ -35,9 +35,9 @@
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │                Scripts                                 │ │
 │  │                                                        │ │
-│  │  flow-state.sh: 状态管理                               │ │
-│  │  spec-tracker.sh: Spec 覆盖率检查                      │ │
-│  │  adversarial-review.sh: 对抗验证编排                   │ │
+│  │  flow-state.py: 状态管理                               │ │
+│  │  spec-tracker.py: Spec 覆盖率检查                      │ │
+│  │  adversarial-review.py: 对抗验证编排                   │ │
 │  │                                                        │ │
 │  └────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
@@ -91,7 +91,7 @@
 
 #### archive-agent
 - **输入**：所有阶段产物
-- **输出**：`TASK_ARCHIVE.md`、归档 spec
+- **输出**：`archive/<YYYY-MM-DD>_<任务名>.md`
 - **关注**：知识沉淀、经验总结
 
 ### 3. Supporting Agents（辅助代理）
@@ -111,17 +111,19 @@
 
 ### 4. Scripts（脚本工具）
 
-#### flow-state.sh
+均为 Python 3 标准库实现，无外部依赖，跨平台（`python scripts/xxx.py` 调用，无需执行权限）。
+
+#### flow-state.py
 - **功能**：管理 `.dev-flow-state.json`
-- **命令**：`init`, `advance`, `update`, `show`
+- **命令**：`init`, `advance`, `update`, `show`, `check-phase`
 - **用途**：状态持久化、进度跟踪
 
-#### spec-tracker.sh
+#### spec-tracker.py
 - **功能**：检查 Spec 覆盖率
 - **命令**：`check`, `list-specs`, `list-coverage`
 - **用途**：验证每个 Spec 是否有对应测试
 
-#### adversarial-review.sh
+#### adversarial-review.py
 - **功能**：编排对抗验证流程
 - **命令**：`collect`, `show-pending`, `record-refutation`
 - **用途**：汇总 findings、跟踪反驳状态
@@ -179,27 +181,25 @@ apply-agent
 apply-agent
   └─ 输出：完整实现 + 测试
            ↓
-[并行派发 4 个 reviewer]
-  ├─ correctness-reviewer → review-summary-correctness.json
-  ├─ security-reviewer → review-summary-security.json
-  ├─ performance-reviewer → review-summary-performance.json
-  └─ test-reviewer → review-summary-test.json
+[并行派发 4 个 reviewer 子 agent]
+  ├─ correctness-reviewer → review-correctness.json
+  ├─ security-reviewer → review-security.json
+  ├─ performance-reviewer → review-performance.json
+  └─ test-reviewer → review-test.json
            ↓
-adversarial-review.sh collect
+python scripts/adversarial-review.py collect
   └─ 生成：review_summary.json
-      - findings: 所有问题
-      - needs_refutation: 单独 ERR（需要反驳）
+      - multi_evidence_confirmed: ≥2 子 agent 对同一文件报 ERROR（必改）
+      - needs_refutation: 单子 agent ERR（需要反驳）
            ↓
 [串行处理每个 needs_refutation]
-  └─ adversarial-verifier
+  └─ adversarial-verifier 子 agent
       ├─ 读取：finding + 代码
       ├─ 判断：refuted/confirmed/uncertain
-      └─ 调用：adversarial-review.sh record-refutation
+      └─ 调用：python scripts/adversarial-review.py record-refutation
            ↓
-adversarial-review.sh collect (再次)
-  └─ 更新：review_summary.json
-      - must_fix: 确认的 ERR
-      - should_fix: WARN 或 refuted 的 ERR
+report-writer 子 agent
+  ├─ 读取：review_summary.json
            ↓
 report-writer
   ├─ 读取：review_summary.json
@@ -211,73 +211,55 @@ report-writer
 ```
 (如果 Must-Fix > 0)
   ↓
-Mini-Apply 子循环：
-  while must_fix_count > 0:
-    apply-agent:
+Mini-Apply 子循环（上限 2 轮）：
+  while must_fix_count > 0 and round <= 2:
+    apply-agent 子 agent:
       - 输入：Must-Fix findings
       - 输出：修复后的代码
     运行全量测试
     重新 review（只针对修复文件）
     更新 must_fix_count
+  （超过 2 轮仍有 Must-Fix → 回退 Phase 2）
   ↓
 (当 Must-Fix = 0)
   ↓
-archive-agent
+archive-agent 子 agent
   ├─ 读取：所有阶段产物
   │   - explore_report.md
   │   - proposal.md
   │   - review_report.md
   │   - 实现代码
   ├─ 输出：
-  │   - TASK_ARCHIVE.md
-  │   - specs/archive/{task_slug}_{timestamp}.md
+  │   - archive/<YYYY-MM-DD>_<任务名>.md
   └─ 更新：
-      - .dev-flow-state.json → status = "completed"
+      - .dev-flow-state.json → archive_path
 ```
 
 ## 状态管理
 
 ### .dev-flow-state.json
 
+扁平结构（与 `flow-state.py` 一致，SKILL.md 为唯一真相源）：
+
 ```json
 {
   "task": "实现用户认证系统",
-  "started_at": "2026-06-17T10:05:30Z",
-  "last_updated": "2026-06-17T14:32:00Z",
+  "route": "full",
   "current_phase": 4,
   "phases_done": [1, 2, 3],
-  "phases_pending": [4, 5],
-  "phase_details": {
-    "1": {
-      "status": "completed",
-      "started_at": "2026-06-17T10:05:30Z",
-      "completed_at": "2026-06-17T10:15:22Z",
-      "outputs": [".sdd-tdd/explore_report.md"]
-    },
-    "2": {
-      "status": "completed",
-      "started_at": "2026-06-17T10:16:00Z",
-      "completed_at": "2026-06-17T10:45:18Z",
-      "outputs": [".sdd-tdd/proposal.md"],
-      "specs_count": 5
-    },
-    "3": {
-      "status": "completed",
-      "started_at": "2026-06-17T10:46:00Z",
-      "completed_at": "2026-06-17T12:30:45Z",
-      "outputs": ["src/auth.rs", "tests/auth_test.rs"],
-      "tests_passed": 5
-    },
-    "4": {
-      "status": "in_progress",
-      "started_at": "2026-06-17T12:31:00Z",
-      "reviewers_done": ["correctness", "security", "performance", "test"],
-      "findings_total": 4,
-      "needs_refutation": 2,
-      "must_fix": 0,
-      "refutations_done": 2
-    }
-  }
+  "explore_path": ".sdd-tdd/explore_report.md",
+  "proposal_path": ".sdd-tdd/proposal.md",
+  "apply_log_path": ".sdd-tdd/apply_log.md",
+  "review_report_path": ".sdd-tdd/review_report.md",
+  "specs_total": 5,
+  "specs_done": 5,
+  "review_findings": { "error": 2, "warn": 1, "info": 1 },
+  "must_fix_total": 2,
+  "must_fix_done": 0,
+  "review_round": 1,
+  "archive_path": "",
+  "started_at": "2026-06-17T10:05:30Z",
+  "updated_at": "2026-06-17T14:32:00Z"
 }
 ```
 
@@ -311,15 +293,15 @@ project/
 │   │   ├── report-writer.md
 │   │   └── archive-agent.md
 │   └── scripts/
-│       ├── flow-state.sh
-│       ├── spec-tracker.sh
-│       └── adversarial-review.sh
+│       ├── flow-state.py
+│       ├── spec-tracker.py
+│       └── adversarial-review.py
 │
 ├── .sdd-tdd/                             # 运行时状态（不提交到 Git）
 │   ├── .dev-flow-state.json
 │   ├── explore_report.md
 │   ├── proposal.md
-│   ├── review-summary-*.json
+│   ├── review-*.json
 │   ├── review_summary.json
 │   └── review_report.md
 │
@@ -330,37 +312,31 @@ project/
 ├── tests/                                 # 项目测试
 │   └── auth_test.rs
 │
-├── specs/                                 # Spec 库
-│   ├── active/
-│   │   └── TASK_SPEC.md
-│   └── archive/
-│       └── user_auth_20260617.md
-│
-└── TASK_ARCHIVE.md                        # 任务归档
+└── archive/                               # 任务归档
+    └── 2026-06-17_user-auth.md
 ```
 
 ## 扩展机制
 
 ### 添加新的 Phase
 
-1. 创建新的 agent 文件：`agents/{new-phase}-agent.md`
+1. 创建新的子 agent 文件：`agents/{new-phase}-agent.md`
 2. 更新 `orchestrator.md`，添加新阶段的调度逻辑
-3. 更新 `flow-state.sh`，调整阶段编号
-4. 更新 `SKILL.md`，描述新阶段
+3. 更新 `flow-state.py`，调整阶段编号（`LAST_PHASE`）
+4. 更新 `SKILL.md`，描述新阶段（SKILL.md 为唯一真相源）
 
 ### 添加新的 Reviewer
 
-1. 创建新的 reviewer agent：`agents/{domain}-reviewer.md`
+1. 创建新的 reviewer 子 agent：`agents/{domain}-reviewer.md`
 2. 更新 `report-format.md`，添加新的 agent 前缀
 3. 更新 `orchestrator.md`，在 Phase 4 并行派发新 reviewer
-4. 更新 `adversarial-review.sh`（如果有特殊处理）
+4. 更新 `adversarial-review.py`（如果有特殊处理）
 
 ### 添加新的脚本
 
-1. 创建脚本文件：`scripts/{new-tool}.sh`
-2. 添加执行权限：`chmod +x scripts/{new-tool}.sh`
-3. 在文档中说明用途和用法
-4. 被相应 agent 或 orchestrator 调用
+1. 创建脚本文件：`scripts/{new-tool}.py`（Python 3 标准库）
+2. 在文档中说明用途和用法
+3. 被相应子 agent 或 orchestrator 调用（`python scripts/{new-tool}.py`，无需执行权限）
 
 ## 性能考量
 
@@ -374,17 +350,13 @@ project/
 
 ### 为什么 Mini-Apply 是循环？
 
-修复一个问题可能引入新问题。循环直到稳定（Must-Fix = 0）。但有 3 次上限防止死循环。
+修复一个问题可能引入新问题。循环直到稳定（Must-Fix = 0）。但有 **2 轮上限**防止死循环；超过则回退 Phase 2。
 
 ## 安全考量
 
-### 脚本执行权限
+### 脚本执行
 
-所有脚本默认无执行权限，需要手动 `chmod +x`：
-
-```bash
-chmod +x skills/sdd-tdd-paradigm/scripts/*.sh
-```
+脚本为 Python 3 标准库实现，用 `python scripts/xxx.py` 调用，**无需执行权限**，跨平台。
 
 ### 状态文件隔离
 
@@ -394,7 +366,7 @@ chmod +x skills/sdd-tdd-paradigm/scripts/*.sh
 
 ### 代码修改范围
 
-Apply agent 只修改：
+Apply 子 agent 只修改：
 - `src/` 目录（实现代码）
 - `tests/` 目录（测试代码）
 
@@ -414,8 +386,8 @@ Apply agent 只修改：
 
 ### 测试失败
 
-Apply agent 最多尝试 3 次修复，失败后：
-- 回退到 Phase 2（Design）
+Apply 子 agent 最多尝试 2 轮修复，失败后：
+- 回退到 Phase 2（Proposal）
 - 记录失败原因
 
 ### 状态损坏
@@ -449,8 +421,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Check Spec Coverage
         run: |
-          chmod +x skills/sdd-tdd-paradigm/scripts/*.sh
-          ./skills/sdd-tdd-paradigm/scripts/spec-tracker.sh check
+          python skills/sdd-tdd-paradigm/scripts/spec-tracker.py check .sdd-tdd/proposal.md tests
 ```
 
 ### IDE 插件

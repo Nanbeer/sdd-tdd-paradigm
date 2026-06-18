@@ -101,8 +101,7 @@ Claude：
 
 Claude：
   [Phase 5: Archive]
-  ✓ TASK_ARCHIVE.md 已生成
-  ✓ TASK_SPEC.md 已归档到 specs/archive/
+  ✓ archive/2026-06-17_user-auth.md 已生成
   
   任务完成！
 ```
@@ -132,7 +131,7 @@ Claude：
 随时检查当前状态：
 
 ```bash
-./skills/sdd-tdd-paradigm/scripts/flow-state.sh show
+python ./skills/sdd-tdd-paradigm/scripts/flow-state.py show
 ```
 
 输出示例：
@@ -140,7 +139,6 @@ Claude：
 task: 实现用户认证系统
 current_phase: 4
 phases_done: 1, 2, 3
-phases_pending: 4, 5
 last_updated: 2026-06-17T14:32:00Z
 ```
 
@@ -148,19 +146,19 @@ last_updated: 2026-06-17T14:32:00Z
 
 ```bash
 # 查看状态
-./skills/sdd-tdd-paradigm/scripts/flow-state.sh show
+python ./skills/sdd-tdd-paradigm/scripts/flow-state.py show
 
 # 手动推进（不推荐，除非你理解后果）
-./skills/sdd-tdd-paradigm/scripts/flow-state.sh advance
+python ./skills/sdd-tdd-paradigm/scripts/flow-state.py advance
 
 # 检查 spec 覆盖率
-./skills/sdd-tdd-paradigm/scripts/spec-tracker.sh check
+python ./skills/sdd-tdd-paradigm/scripts/spec-tracker.py check .sdd-tdd/proposal.md tests
 
 # 汇总审查结果
-./skills/sdd-tdd-paradigm/scripts/adversarial-review.sh collect
+python ./skills/sdd-tdd-paradigm/scripts/adversarial-review.py collect .sdd-tdd/
 
 # 手动记录反驳结果（正常流程中不需要）
-./skills/sdd-tdd-paradigm/scripts/adversarial-review.sh record-refutation \
+python ./skills/sdd-tdd-paradigm/scripts/adversarial-review.py record-refutation \
   COR-001 refuted "理由..."
 ```
 
@@ -240,8 +238,7 @@ git add .sdd-tdd/review_report.md
 git commit -m "review: user auth"
 
 # Phase 5 的归档
-git add TASK_ARCHIVE.md
-git add TASK_SPEC.md
+git add archive/2026-06-17_user-auth.md
 git commit -m "archive: user auth"
 
 # 合并到主分支
@@ -253,14 +250,14 @@ git merge sdd-tdd/user-auth
 
 ### 问题：流程卡在某个阶段
 
-**症状**：`flow-state.sh show` 显示 `current_phase: X` 但实际产物不存在
+**症状**：`python scripts/flow-state.py show` 显示 `current_phase: X` 但实际产物不存在
 
 **原因**：阶段执行失败但状态未更新
 
 **解决**：
 ```bash
 # 1. 强制推进
-./skills/sdd-tdd-paradigm/scripts/flow-state.sh advance
+python ./skills/sdd-tdd-paradigm/scripts/flow-state.py advance
 
 # 2. 重新运行该阶段
 # （通过 /sdd-tdd 重新进入流程）
@@ -289,7 +286,7 @@ git merge sdd-tdd/user-auth
 **解决**：
 1. 重新读取 `proposal.md`，确认 spec 定义
 2. 检查测试代码是否真的验证了 spec 行为
-3. 如果修复 3 次仍失败 → 回退到 Phase 2（Design）
+3. 如果修复 2 轮仍失败 → 回退到 Phase 2（Design）
 
 ### 问题：对抗验证全部 refuted
 

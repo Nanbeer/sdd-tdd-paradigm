@@ -6,19 +6,23 @@ SDD-TDD Paradigm（规格驱动 × 测试驱动开发范式）是一个多阶段
 
 ### 1.1 安装
 
-一行命令安装技能：
+克隆仓库并运行安装脚本：
 
 **Linux / Mac：**
 ```bash
-curl -sL -H "PRIVATE-TOKEN: <your-token>" "https://your-gitlab/skills/sdd-tdd-paradigm/raw?ref=master" | bash
+git clone https://github.com/Nanbeer/sdd-tdd-paradigm.git /tmp/sdd-tdd
+cd /tmp/sdd-tdd
+bash install.sh
 ```
 
-**Windows（PowerShell）：**
+**Windows（PowerShell，需 Git Bash）：**
 ```powershell
-Invoke-RestMethod -Uri "https://your-gitlab/skills/sdd-tdd-paradigm/raw?ref=master" -Headers @{"PRIVATE-TOKEN"="<your-token>"} | Invoke-Expression
+git clone https://github.com/Nanbeer/sdd-tdd-paradigm.git $env:TEMP\sdd-tdd
+cd $env:TEMP\sdd-tdd
+bash install.sh
 ```
 
-安装脚本会将技能复制到 `~/.claude/skills/sdd-tdd-paradigm/`（用户级，跨项目）或当前项目的 `.claude/skills/sdd-tdd-paradigm/`（项目级）。
+安装脚本会交互式询问安装位置，将技能复制到 `~/.claude/skills/sdd-tdd-paradigm/`（用户级，跨项目）或当前项目的 `.claude/skills/sdd-tdd-paradigm/`（项目级）。也可用 `install.sh --user`（用户级）或 `install.sh --project <路径>`（项目级）跳过交互。
 
 ### 1.2 启动开发流程
 

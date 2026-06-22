@@ -57,6 +57,9 @@ def scan_tests(tests_dir: Path, spec_id: str) -> list[str]:
             text = p.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
+        # \b 在 Unicode 模式下对 CJK 字符的边界判定与英文不同：
+        # "NOT Spec-1"（空格构成边界）会被匹配，"NOTSpec-1"（无边界）不会。
+        # 当前风险可接受——测试注释通常用英文标记 Spec ID。
         if re.search(r'\b' + re.escape(spec_id) + r'\b', text):
             matches.append(str(p))
     return matches

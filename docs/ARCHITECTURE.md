@@ -81,7 +81,7 @@
 
 #### review agents (4 个)
 - **输入**：实现代码、`proposal.md`
-- **输出**：`review-summary-{agent}.json`
+- **输出**：`review-{agent}.json`
 - **关注**：各自领域的审查（Correctness/Security/Performance/Test）
 
 #### adversarial-verifier
@@ -377,9 +377,9 @@ Apply 子 agent 只修改：
 
 ## 容错设计
 
-### Agent 超时
+### Agent 异常
 
-每个 agent 有 5 分钟超时，超时后：
+子 agent 运行时间不受限制。若执行失败：
 - 标记为 failed
 - 记录到 `.dev-flow-state.json`
 - orchestrator 决定是否继续

@@ -62,35 +62,36 @@ Agent 工具调用:
 
 ### Phase 1: Explore
 1. `python scripts/flow-state.py init "<task>"` 初始化状态
-2. 派发 explore-agent 子 agent（输入：用户需求 + 项目根目录）
-3. 校验 `.sdd-tdd/explore_report.md` 存在且章节完整
-4. `python scripts/flow-state.py advance`
+2. `python scripts/flow-state.py update base_commit "$(git rev-parse HEAD)"` 记录基准 commit
+3. 派发 explore-agent 子 agent（输入：用户需求 + 项目根目录）
+4. 校验 `.sdd-tdd/explore_report.md` 存在且章节完整
+5. `python scripts/flow-state.py advance`
 
 ### Phase 2: Proposal
-5. 派发 proposal-agent 子 agent（输入：`explore_report.md`）
-6. 校验 `.sdd-tdd/proposal.md` 存在、含 Spec 清单
-7. `python scripts/flow-state.py advance`
+6. 派发 proposal-agent 子 agent（输入：`explore_report.md`）
+7. 校验 `.sdd-tdd/proposal.md` 存在、含 Spec 清单
+8. `python scripts/flow-state.py advance`
 
 ### Phase 3: Apply
-8. 派发 apply-agent 子 agent（输入：`proposal.md`）
-9. 子 agent 按 Spec 逐个 TDD 实现，产出实现 + 测试 + `apply_log.md`
-10. 运行全量测试；运行 `python scripts/spec-tracker.py check .sdd-tdd/proposal.md <tests_dir>`
-11. `python scripts/flow-state.py advance`
+9. 派发 apply-agent 子 agent（输入：`proposal.md`）
+10. 子 agent 按 Spec 逐个 TDD 实现，产出实现 + 测试 + `apply_log.md`
+11. 运行全量测试；运行 `python scripts/spec-tracker.py check .sdd-tdd/proposal.md <tests_dir>`
+12. `python scripts/flow-state.py advance`
 
 ### Phase 4: Review
-12. **并行派发 4 个 reviewer 子 agent**（单条消息 4 个 Agent 调用）：
+13. **并行派发 4 个 reviewer 子 agent**（单条消息 4 个 Agent 调用）：
     - correctness-reviewer / security-reviewer / performance-reviewer / test-reviewer
     - 各自输出 `.sdd-tdd/review-<agent>.json`
-13. `python scripts/adversarial-review.py collect .sdd-tdd/` 汇总 findings
-14. 对每个 `needs_refutation` 的 finding，派发独立 adversarial-verifier 子 agent 尝试反驳；用 `adversarial-review.py record-refutation <id> <verdict> "<理由>"` 记录
-15. 派发 report-writer 子 agent 生成 `.sdd-tdd/review_report.md`
-16. **Mini-Apply**：若有 Must-Fix，派发 apply-agent 子 agent 逐个 TDD 修复（先补暴露问题的测试→改代码→全量回归）；重新 review 修复的文件
-17. Must-Fix = 0 后 `python scripts/flow-state.py advance`
+14. `python scripts/adversarial-review.py collect .sdd-tdd/` 汇总 findings
+15. 对每个 `needs_refutation` 的 finding，派发独立 adversarial-verifier 子 agent 尝试反驳；用 `adversarial-review.py record-refutation <id> <verdict> "<理由>"` 记录
+16. 派发 report-writer 子 agent 生成 `.sdd-tdd/review_report.md`
+17. **Mini-Apply**：若有 Must-Fix，派发 apply-agent 子 agent 逐个 TDD 修复（先补暴露问题的测试→改代码→全量回归）；重新 review 修复的文件
+18. Must-Fix = 0 后 `python scripts/flow-state.py advance`
 
 ### Phase 5: Archive
-18. 派发 archive-agent 子 agent（输入：所有阶段产物）
-19. 校验 `archive/<YYYY-MM-DD>_<任务名>.md` 产出
-20. `python scripts/flow-state.py update archive_path "<路径>"`，流程完成
+19. 派发 archive-agent 子 agent（输入：所有阶段产物）
+20. 校验 `archive/<YYYY-MM-DD>_<任务名>.md` 产出
+21. `python scripts/flow-state.py update archive_path "<路径>"`，流程完成
 
 ## 中断恢复策略
 

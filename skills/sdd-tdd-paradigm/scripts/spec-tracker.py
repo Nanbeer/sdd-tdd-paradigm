@@ -57,7 +57,7 @@ def scan_tests(tests_dir: Path, spec_id: str) -> list[str]:
             text = p.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        if spec_id in text:
+        if re.search(r'\b' + re.escape(spec_id) + r'\b', text):
             matches.append(str(p))
     return matches
 

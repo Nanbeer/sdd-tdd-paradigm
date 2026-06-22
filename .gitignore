@@ -41,6 +41,9 @@ Thumbs.db
 .sdd-tdd/
 *.log
 
+# OpenSpec change artifacts (local design working files, not committed)
+openspec/
+
 # Test coverage
 .coverage
 htmlcov/

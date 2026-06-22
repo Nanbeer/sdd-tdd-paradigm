@@ -239,63 +239,70 @@ Spec-02: 配置文件不存在时使用默认值
 #### Correctness Reviewer
 ```json
 {
-  "agent": "correctness",
+  "agent": "Correctness",
   "findings": [
     {
       "id": "COR-001",
       "severity": "WARN",
-      "location": "src/config.rs:145",
+      "file": "src/config.rs",
+      "line": "145",
       "issue": "环境变量解析未处理空值",
       "evidence": "当环境变量存在但值为空时，parse_env_value() 返回空字符串而非 Error",
       "suggestion": "检查空值并返回 ConfigError::EmptyValue"
     }
   ],
-  "verdict": "WARN"
+  "summary": "核心逻辑正确，1 处边界处理可改进",
+  "verdict": "PASS"
 }
 ```
 
 #### Security Reviewer
 ```json
 {
-  "agent": "security",
+  "agent": "Security",
   "findings": [
     {
       "id": "SEC-001",
       "severity": "INFO",
-      "location": "src/config.rs:78",
+      "file": "src/config.rs",
+      "line": "78",
       "issue": "配置验证信息可能被日志泄露",
       "evidence": "debug_log!() 输出了完整的 Config 结构（包括密码字段）",
       "suggestion": "为敏感字段实现 custom Debug trait，隐藏值"
     }
   ],
-  "verdict": "OK"
+  "summary": "无安全问题",
+  "verdict": "PASS"
 }
 ```
 
 #### Performance Reviewer
 ```json
 {
-  "agent": "performance",
+  "agent": "Performance",
   "findings": [],
-  "verdict": "OK"
+  "summary": "无性能问题",
+  "verdict": "PASS"
 }
 ```
 
 #### Test Reviewer
 ```json
 {
-  "agent": "test",
+  "agent": "Test-Completeness",
   "findings": [
     {
       "id": "TST-001",
       "severity": "INFO",
-      "location": "tests/config_test.rs:67",
+      "file": "tests/config_test.rs",
+      "line": "67",
       "issue": "测试缺少并发场景",
       "evidence": "多个线程同时读取 Config 实例未测试",
       "suggestion": "添加 test_concurrent_access() 验证线程安全性"
     }
   ],
-  "verdict": "OK"
+  "summary": "测试覆盖基本完整",
+  "verdict": "PASS"
 }
 ```
 
@@ -544,4 +551,3 @@ git merge feature/config-manager
 - 📖 [快速开始](QUICKSTART.md) — 5 分钟上手指南
 - 🏗️ [系统架构](ARCHITECTURE.md) — 深入理解系统
 - 🧠 [方法论](METHODOLOGY.md) — SDD-TDD 核心理念
-- ❓ [FAQ](FAQ.md) — 常见问题解答

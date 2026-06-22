@@ -53,7 +53,7 @@ Agent 工具调用:
 
 ### 小改动路径
 
-小改动**不派发子 agent**，主 Claude 直接执行普通流程：参考 `test-driven-development` 技能（先写失败测试→最少实现→重构）+ 全量回归。本技能正文其余部分针对大改动的完整流程。
+小改动**不派发子 agent**，主 Claude 直接执行普通流程：先写失败测试→最少实现→重构 + 全量回归。本技能正文其余部分针对大改动的完整流程。
 
 ---
 
@@ -163,6 +163,7 @@ Agent 工具调用:
   "route": "full",
   "current_phase": 1,
   "phases_done": [],
+  "base_commit": "",
   "explore_path": ".sdd-tdd/explore_report.md",
   "proposal_path": ".sdd-tdd/proposal.md",
   "apply_log_path": ".sdd-tdd/apply_log.md",
@@ -210,7 +211,7 @@ Agent 工具调用:
 
 ## 与其他技能的关系
 
-- **test-driven-development**：Phase 3 (Apply) 与小改动普通流程使用 TDD 技能的方法
+- **TDD 循环**：Phase 3 (Apply) 与小改动普通流程使用标准的 TDD 循环（Red→Green→Refactor）
 - **code-review**：Phase 4 (Review) 的 4 个子 agent 借鉴 code-review 的多视角审查模式
 - **brainstorming**：Phase 1 (Explore) 可使用 brainstorming 技能识别风险点
 

@@ -60,6 +60,8 @@ def init_state(task_name: str) -> None:
         "route": "full",
         "current_phase": 1,
         "phases_done": [],
+        "base_commit": "",
+        "explore_path": f"{STATE_DIR.name}/explore_report.md",
         "explore_path": f"{STATE_DIR.name}/explore_report.md",
         "proposal_path": f"{STATE_DIR.name}/proposal.md",
         "apply_log_path": f"{STATE_DIR.name}/apply_log.md",

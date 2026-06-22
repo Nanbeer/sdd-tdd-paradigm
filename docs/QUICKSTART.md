@@ -306,4 +306,3 @@ python ./skills/sdd-tdd-paradigm/scripts/flow-state.py advance
 - 阅读 [METHODOLOGY.md](./METHODOLOGY.md) 深入理解方法论
 - 查看 [ARCHITECTURE.md](./ARCHITECTURE.md) 了解系统架构
 - 浏览 [EXAMPLES.md](./EXAMPLES.md) 学习实战案例
-- 阅读 [FAQ.md](./FAQ.md) 解答常见疑问

@@ -4,6 +4,38 @@ All notable changes to the SDD-TDD Paradigm skill will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] - 2026-06-22
+
+### Added
+- **🔥 Grilling Protocol**：内置无情追问机制（G1-G5），在两个关键节点执行：
+  - Grilling 点 1（Explore→Proposal）：拷问对问题的理解，逼出隐藏假设
+  - Grilling 点 2（Proposal→Apply）：拷问 Spec 的可证伪性和方案的完备性
+  - G4 退出条件机械校验脚本 `grill-check.py`
+- **Iron Rules（铁律体系 R0-R5）**：将软性自检触发器升级为 6 条强制约束
+  - R0: 技能必调 / R1: 事实先于讨论 / R2: 场景先于代码
+  - R3: 核验先于信任 / R4: 规范高于代码 / R5: 追问先于放行
+  - 用 `flow-state.py iron-check` 记录合规状态，违规阻止 advance
+- **Document Sync Gate**：3 个阶段过渡点（P2→3、P3→4、P4→5）的文档一致性强制检查，PASS/FAIL 表输出
+- **Subagent Self-Report Verification Protocol**：高风险 Apply 任务的主 agent 独立核验（重跑测试、抽查 diff、检查 git status）
+- **Deviation Detection**：流程偏离时自动检测并提醒当前步骤和预期行为
+- **Interruption Protocol**：TDD 循环中途用户追加意见时的三选一处理（保留/回滚/暂存）
+- **flow-state.py 6 个新子命令**：`grill-complete`, `iron-check`, `sync-gate`, `verify-record`, `interrupt-pause`, `interrupt-resume`
+- **状态文件 schema 扩展**：新增 `grilling`, `iron_rules`, `sync_gates`, `verification`, `interruption` 字段（向后兼容）
+
+### Changed
+- **SKILL.md**：+200 行，新增 Iron Rules 表格、Grilling Protocol、Document Sync Gate、Deviation Detection、Interruption Protocol 章节
+- **orchestrator.md**：全面重写 v2.0，新增铁律检查、Grilling 执行、同步 Gate、核验协议、中断处理指令
+- **explore-agent.md**：新增"区分事实与假设"核心原则和"事实与假设"表格（供 Grilling 参考）
+- **proposal-agent.md**：新增"可证伪性"核心原则和"可证伪检查"自检项
+- **apply-agent.md**：新增 Verification Block（测试命令、风险级别判定、文件列表），apply_log 模板增加核验块
+- **archive-agent.md**：新增"Grilling 逼出的边界与反例"归档字段
+- **Self-Check Triggers**：降级为"自检提醒"，最关键的触发器已升级为 Iron Rules
+
+### Fixed
+- `flow-state.py` `init_state()` 中 explore_path 重复定义修复
+
+---
+
 ## [1.1.0] - 2026-06-18
 
 ### Changed

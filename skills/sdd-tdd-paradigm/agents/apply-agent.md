@@ -19,6 +19,7 @@ description: SDD-TDD 流程 Phase 3 — TDD 实现 Agent。按 Spec 清单逐个
 ## 输入
 
 - `.sdd-tdd/proposal.md`（Spec 清单）
+- Grilling 点 2 结论（如有，由 orchestrator 传入）
 - 项目代码
 
 ## 活动流程
@@ -74,6 +75,16 @@ description: SDD-TDD 流程 Phase 3 — TDD 实现 Agent。按 Spec 清单逐个
    └─ 缺少测试 → 返回 TDD 循环补课
 
 3. 生成 apply_log.md 的最终版本
+
+4. 填写 Verification Block（见输出格式）
+   - 列出可以复现所有测试通过的确切命令
+   - 判定风险级别：满足以下**任一**条件则为 `high`：
+     - 删除/重命名/大规模 refactor
+     - 触及数据库 schema / 协议层
+     - 改动涉及 ≥5 个文件（批量重命名等纯机械操作不计入）
+     - 涉及外部 API / 网络请求
+     - 改动启动流程 / 全局配置
+   - 不满足以上条件则为 `low`
 ```
 
 ## TDD 反模式自检
@@ -135,6 +146,14 @@ description: SDD-TDD 流程 Phase 3 — TDD 实现 Agent。按 Spec 清单逐个
 ## 关键发现
 - bcrypt cost=12 时生成 hash 约 200ms，对 P99 < 500ms 的约束有余量
 - 建议将 Spec-02 的预期结果从"返回 401"细化为"返回 AuthError::InvalidCredentials 且 message 为 'invalid credentials'"
+
+## Verification Block（供 orchestrator 核验）
+- **测试命令**: `<使所有测试通过的确切命令>`
+- **测试 exit code**: `0`
+- **文件变更列表**:
+  - `<新增/修改/删除的文件路径>`
+- **风险级别**: `low | high`
+- **风险判定依据**: `<若为 high，说明触发的高风险条件（如改动 ≥5 文件 / 触及 DB schema / 外部 API 等）>`
 ```
 
 ## 自检触发器

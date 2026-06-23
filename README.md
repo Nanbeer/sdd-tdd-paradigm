@@ -1,6 +1,8 @@
 # SDD-TDD Paradigm — 规格驱动 × 测试驱动开发范式
 
-SDD-TDD Paradigm（规格驱动 × 测试驱动开发范式）是一个多阶段开发技能。它根据变更规模自适应选择开发路径，大改动走完整的 5 阶段流程（Explore → Proposal → Apply(TDD) → Review(多Agent交叉验证) → Archive），小改动走普通流程。通过决策前置、实现验证、多Agent审查的三重保障，确保大改动的质量和可追溯性。
+SDD-TDD Paradigm（规格驱动 × 测试驱动开发范式）是一个多阶段开发技能。它根据变更规模自适应选择开发路径，大改动走完整的 5 阶段流程（Explore → Proposal → Apply(TDD) → Review(多Agent交叉验证) → Archive），小改动走普通流程。
+
+**v2.0 新增**：🔥 Grilling 协议（内置无情追问）、铁律体系（R0-R5）、文档同步 Gate、高风险核验协议、偏离检测、中断协议。通过决策前置、Grilling 追问、TDD 实现验证、多 Agent 审查 + 对抗验证的四重保障，确保大改动的质量和可追溯性。
 
 ## 1. 快速入门
 

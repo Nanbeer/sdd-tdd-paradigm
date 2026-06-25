@@ -1,0 +1,68 @@
+{
+  "// SDD-TDD Harness 集成配置": "将此文件的内容合并到项目的 .claude/settings.json 或用户级 ~/.claude/settings.json",
+  "// 使用方式": "部署 sdd-tdd-paradigm skill 后，将以下 hooks 段合并到现有 hooks 配置中",
+  "// 注意": "此文件仅展示 SDD-TDD 相关的 hook 配置，不覆盖你已有的其他 hook",
+
+  "hooks": {
+    "// SessionStart — 自动检测并显示 SDD-TDD 流程状态": "",
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/skills/sdd-tdd-paradigm/hooks/check-flow-state.py"
+          }
+        ]
+      }
+    ],
+
+    "// PreToolUse — 阶段门禁提醒（仅在 SDD-TDD 流程活跃时生效）": "",
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/skills/sdd-tdd-paradigm/hooks/phase-guard.py \"$CLAUDE_TOOL_NAME\" \"$CLAUDE_FILE_PATH\""
+          }
+        ]
+      }
+    ],
+
+    "// PostToolUse — Archive 完成后自动写入 Memory": "",
+    "PostToolUse": [
+      {
+        "matcher": "Write(archive/**)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/skills/sdd-tdd-paradigm/hooks/write-decision-memory.py \"$CLAUDE_FILE_PATH\""
+          }
+        ]
+      }
+    ],
+
+    "// Notification — SDD-TDD 阶段完成时主动通知": "",
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/skills/sdd-tdd-paradigm/hooks/check-flow-state.py --notify"
+          }
+        ]
+      }
+    ]
+  },
+
+  "// 项目级权限建议（可选，用于硬约束）": "",
+  "// 取消注释下面这段可以锁定 Explore 阶段的写权限": "",
+  "// permissions": {
+  "//   "deny": [
+  "//     "Edit(!.sdd-tdd/**)",
+  "//     "Write(!.sdd-tdd/**)"
+  "//   ]
+  "// }
+}
